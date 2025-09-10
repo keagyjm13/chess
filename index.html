@@ -1,1 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chess Practice</title>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- Chessboard.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.css"/>
+</head>
+<body>
+  <header>
+    <h1>Chess Practice</h1>
+  </header>
+
+  <main>
+    <!-- Chessboard -->
+    <div id="board" class="chessboard"></div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <button id="resetBtn">Reset</button>
+      <button id="loadScenarioBtn">Load Scenario</button>
+      <button id="playAI">Play vs AI (Future)</button>
+    </div>
+
+    <!-- Info Panel -->
+    <div id="infoPanel">
+      <p id="status">Status: Ready</p>
+      <p id="moves">Moves: </p>
+    </div>
+  </main>
+
+  <!-- JS libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
 
