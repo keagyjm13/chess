@@ -25,5 +25,19 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log(status);
   }
 
+  // 🔹 Add this handler
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    console.log('Reset clicked');
+    game.reset();          // reset internal chess.js game
+    board.start();         // reset chessboard.js UI to start position
+    updateStatus();
+  });
+
+  document.getElementById('flipBtn').addEventListener('click', () => {
+    console.log('Flip clicked');
+    board.flip();         // flip board
+    updateStatus();
+  });
+
   updateStatus();
 });
