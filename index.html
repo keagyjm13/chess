@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chess Practice</title>
-  
+
   <link rel="stylesheet" href="style.css"/>
-  <!-- Chessboard.js CSS  -->
-  <link rel="stylesheet" href="libs\chessboardjs-1.0.0\css\chessboard-1.0.0.min.css">
+  <!-- Chessboard.js CSS -->
+  <link rel="stylesheet" href="libs/chessboardjs-1.0.0/css/chessboard-1.0.0.min.css">
 </head>
 <body>
   <header>
@@ -22,24 +22,11 @@
     <div id="controls">
       <button id="resetBtn">Reset</button>
       <button id="flipBtn">Flip</button>
-      
+
       <!-- Opening Practice -->
       <button id="startOpeningBtn">Practice Opening</button>
       <select id="openingSelect" style="display:none;">
         <option value="">--Choose Opening--</option>
-        <option value="ruy">Ruy Lopez</option>
-        <option value="italian">Italian Game</option>
-        <option value="sicilian">Sicilian Defense</option>
-        <option value="french">French Defense</option>
-        <option value="carokann">Caro–Kann</option>
-        <option value="scandinavian">Scandinavian Defense</option>
-        <option value="pirc">Pirc Defense</option>
-        <option value="modern">Modern Defense</option>
-        <option value="kingsindian">King’s Indian Defense</option>
-        <option value="nimzo">Nimzo–Indian Defense</option>
-        <option value="queensgambit">Queen’s Gambit</option>
-        <option value="london">London System</option>
-        <option value="english">English Opening</option>
       </select>
     </div>
 
@@ -49,10 +36,11 @@
       <p id="moves">Moves: </p>
     </div>
   </main>
-  
+
+  <!-- JS libraries -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chess.js@0.10.3/chess.min.js"></script>
-  <script src="libs\chessboardjs-1.0.0\js\chessboard-1.0.0.min.js"></script>
+  <script src="libs/chessboardjs-1.0.0/js/chessboard-1.0.0.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
