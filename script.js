@@ -414,34 +414,40 @@ window.addEventListener('DOMContentLoaded', () => {
       const move = game.move({ from: source, to: target, promotion: 'q' });
       if (move === null) return 'snapback';
 
-      // opening practice: check and auto-play
-      if (currentOpening) {
-        const playedMoves = game.history().join(' ');
-        // We only validate if the user’s move matches one of the allowed next moves
-        // get previous state before user move
+      // Assisted mode: check against tree
+      if (currentOpening && assistedMode) {
         const prevMoves = game.history().slice(0, -1).join(' ');
         const allowed = currentOpening.tree[prevMoves];
         if (allowed && !allowed.includes(move.san)) {
-          alert(`This move is not in the current branch. Allowed: ${allowed.join(', ')}`);
+          alert(`This move is not allowed in assisted mode. Allowed: ${allowed.join(', ')}`);
           game.undo();
-          board.position(game.fen());
+          //board.position(game.fen());
           return 'snapback';
         }
+      }
 
-        // choose opponent reply if exists
+      // Update board after user's move
+      //board.position(game.fen());
+      updateStatus();
+
+      // Opponent move after short delay
+      if (currentOpening) {
         const afterMoves = game.history().join(' ');
         const oppChoices = currentOpening.tree[afterMoves];
+
         if (oppChoices && oppChoices.length > 0) {
-          // pick random opponent reply
-          const oppMoveSan = oppChoices[Math.floor(Math.random() * oppChoices.length)];
-          setTimeout(() => {
-            game.move(oppMoveSan);
-            board.position(game.fen());
-            updateStatus();
-          }, 500);
+          // Filter only legal moves
+          const legalSANs = oppChoices.filter(san => game.moves().includes(san));
+          if (legalSANs.length > 0) {
+            setTimeout(() => {
+              const oppMoveSan = legalSANs[Math.floor(Math.random() * legalSANs.length)];
+              game.move(oppMoveSan);
+              board.position(game.fen());
+              updateStatus();
+            }, 300); // 300ms delay
+          }
         }
       }
-      updateStatus();
     }
   });
 
@@ -498,6 +504,36 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  let assistedMode = false; // default: free mode
+
+  // Show/hide the tree
+  document.getElementById('showTreeBtn').addEventListener('click', () => {
+    if (!currentOpening) {
+      alert("Select an opening first!");
+      return;
+    }
+
+    const display = document.getElementById('treeDisplay');
+    display.style.display = display.style.display === 'none' ? 'block' : 'none';
+
+    if (display.style.display === 'block') {
+      assistedMode = true;
+      display.innerHTML = formatTree(currentOpening.tree);
+    } else {
+      assistedMode = false;
+    }
+  });
+
+  // Format tree as readable text
+  function formatTree(tree) {
+    let html = '';
+    for (const key in tree) {
+      const nextMoves = tree[key].join(', ');
+      html += `<strong>${key || 'Start'}</strong> → ${nextMoves}<br/>`;
+    }
+    return html;
+  }
 
   updateStatus();
 });
