@@ -463,9 +463,21 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       // Update board after user's move
-      //board.position(game.fen());
       updateStatus();
-      
+
+      // === Check if user has completed the opening ===
+      if (currentOpening && assistedMode) {
+        const afterMoves = game.history().join(' ');
+        const nextMoves = currentOpening.tree[afterMoves];
+
+        if (!nextMoves || nextMoves.length === 0) {
+          // Opening complete
+          alert(`🎉 Congratulations! You've completed the opening: ${currentOpening.name}`);
+          assistedMode = false;
+          $('#board .square-55d63').css('box-shadow', ''); // remove highlights
+          return; // exit early, no opponent move
+        }
+      }
 
       // Opponent move after short delay
       if (currentOpening) {
@@ -590,20 +602,30 @@ window.addEventListener('DOMContentLoaded', () => {
     // clear old highlights
     $('#board .square-55d63').css('box-shadow', '');
 
-    // show new highlights
+    // highlight colors for 1st, 2nd, 3rd move options
     const colors = [
-      'rgba(0,200,0,0.6)',
-      'rgba(0,150,255,0.6)',
-      'rgba(255,200,0,0.6)'
+      'rgba(0,200,0,0.6)',   // green
+      'rgba(0,150,255,0.6)', // blue
+      'rgba(255,200,0,0.6)'  // yellow
     ];
 
     possibleMoves.forEach((san, i) => {
       try {
         const move = game.move(san, { sloppy: true });
         if (move) {
-          const square = move.to;
-          const squareEl = $('#board .square-' + square);
-          squareEl.css('box-shadow', `inset 0 0 10px 3px ${colors[Math.min(i, colors.length - 1)]}`);
+          const fromSquare = move.from;
+          const toSquare = move.to;
+          const color = colors[Math.min(i, colors.length - 1)];
+
+          // === Highlight the destination square ===
+          const toEl = $('#board .square-' + toSquare);
+          toEl.css('box-shadow', `inset 0 0 10px 3px ${color}`);
+
+          // === Highlight the starting square with the SAME color ===
+          const fromEl = $('#board .square-' + fromSquare);
+          fromEl.css('box-shadow', `0 0 10px 3px ${color}`);
+
+          // Undo to keep game state consistent
           game.undo();
         }
       } catch (e) {
@@ -611,7 +633,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // update notation display
+    // Update notation display
     showPossibleNotations(possibleMoves);
   }
 
