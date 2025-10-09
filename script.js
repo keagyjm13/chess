@@ -1,6 +1,42 @@
 window.addEventListener('DOMContentLoaded', () => {
   const game = new Chess();
 
+  function highlightSquares(allowedSANs) {
+    // clear existing highlights
+    $('#board .square-55d63').css('box-shadow', '');
+
+    if (!allowedSANs || allowedSANs.length === 0) return;
+
+    // get all legal moves as objects {from, to, san, ...}
+    const legalMoves = game.moves({ verbose: true });
+
+    // optional color scale
+    const colors = [
+      'rgba(0,200,0,0.6)',
+      'rgba(0,150,255,0.6)',
+      'rgba(255,200,0,0.6)'
+    ];
+    // choose color depending on number of choices (1..3)
+    const color = colors[Math.min(allowedSANs.length, 3) - 1];
+
+    legalMoves.forEach(m => {
+      if (allowedSANs.includes(m.san)) {
+        // highlight destination square
+        const squareEl = $('#board .square-' + m.to);
+        squareEl.css('box-shadow', `inset 0 0 10px 3px ${color}`);
+      }
+    });
+  }
+
+  function showPossibleNotations(moves) {
+    const movesEl = document.getElementById('moves');
+    if (!moves || moves.length === 0) {
+      movesEl.textContent = 'Moves: (no book moves)';
+      return;
+    }
+    movesEl.textContent = 'Moves: ' + moves.join(', ');
+  }
+
   // openings: now with branch trees
   // tree: keys = moves played so far separated by spaces, values = array of allowed opponent replies
   const openings = {
@@ -418,10 +454,10 @@ window.addEventListener('DOMContentLoaded', () => {
       if (currentOpening && assistedMode) {
         const prevMoves = game.history().slice(0, -1).join(' ');
         const allowed = currentOpening.tree[prevMoves];
+        // only validate here — don't highlight in this validation block
         if (allowed && !allowed.includes(move.san)) {
           alert(`This move is not allowed in assisted mode. Allowed: ${allowed.join(', ')}`);
           game.undo();
-          //board.position(game.fen());
           return 'snapback';
         }
       }
@@ -429,6 +465,7 @@ window.addEventListener('DOMContentLoaded', () => {
       // Update board after user's move
       //board.position(game.fen());
       updateStatus();
+      
 
       // Opponent move after short delay
       if (currentOpening) {
@@ -444,6 +481,7 @@ window.addEventListener('DOMContentLoaded', () => {
               game.move(oppMoveSan);
               board.position(game.fen());
               updateStatus();
+              updateHighlights();
             }, 300); // 300ms delay
           }
         }
@@ -464,6 +502,8 @@ window.addEventListener('DOMContentLoaded', () => {
     game.reset();
     board.start();
     currentOpening = null;
+    $('#board .square-55d63').css('box-shadow', '');
+    showPossibleNotations([]);
     updateStatus();
   });
 
@@ -515,13 +555,18 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     const display = document.getElementById('treeDisplay');
-    display.style.display = display.style.display === 'none' ? 'block' : 'none';
+    const showing = display.style.display === 'none' || display.style.display === '';
 
-    if (display.style.display === 'block') {
+    // Toggle display of the tree
+    display.style.display = showing ? 'block' : 'none';
+
+    if (showing) {
       assistedMode = true;
       display.innerHTML = formatTree(currentOpening.tree);
+      updateHighlights(); // ✅ <-- clean, reusable highlight logic
     } else {
       assistedMode = false;
+      $('#board .square-55d63').css('box-shadow', '');
     }
   });
 
@@ -534,6 +579,42 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     return html;
   }
+
+  function updateHighlights() {
+    if (!assistedMode || !currentOpening) return;
+
+    // get current move history as key
+    const prevMoves = game.history().join(' ');
+    const possibleMoves = currentOpening.tree[prevMoves] || [];
+
+    // clear old highlights
+    $('#board .square-55d63').css('box-shadow', '');
+
+    // show new highlights
+    const colors = [
+      'rgba(0,200,0,0.6)',
+      'rgba(0,150,255,0.6)',
+      'rgba(255,200,0,0.6)'
+    ];
+
+    possibleMoves.forEach((san, i) => {
+      try {
+        const move = game.move(san, { sloppy: true });
+        if (move) {
+          const square = move.to;
+          const squareEl = $('#board .square-' + square);
+          squareEl.css('box-shadow', `inset 0 0 10px 3px ${colors[Math.min(i, colors.length - 1)]}`);
+          game.undo();
+        }
+      } catch (e) {
+        console.warn('Invalid SAN:', san);
+      }
+    });
+
+    // update notation display
+    showPossibleNotations(possibleMoves);
+  }
+
 
   updateStatus();
 });
